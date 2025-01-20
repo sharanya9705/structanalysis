@@ -1,135 +1,100 @@
-Job_No=int(input('Job no. :  '))
-Job_title=input('Job title: '  )
-Subject=input('Subject: ')
-Client=input('Client: ')
-Made_by=input('Made by: ')
-Checked_by=input('Checked by: ')
-Date=input('Date: ')
+import math
 
+Job_No = int(input('Job no. :  '))
+Job_title = input('Job title: ')
+Subject = input('Subject: ')
+Client = input('Client: ')
+Made_by = input('Made by: ')
+Checked_by = input('Checked by: ')
+Date = input('Date: ')
 
 print('1. ACTIONS AND SUPPORT TYPE')
-g1=int(input('1.1 Permanent Actions(g1, kN/m): '))
-q1=int(input('1.2 Variable Actions(q1, kN/m): '))
-Support=input('Support type: ')
+g1 = int(input('1.1 Permanent Actions(g1, kN/m): '))
+q1 = int(input('1.2 Variable Actions(q1, kN/m): '))
+Support = input('Support type: ')
 print('--------------------------------------------------------------------------------------------------')
 
 print('2. PARTIAL FACTORS FOR ACTIONS')
-γg1=float(input('γg1= '))
-γq1=float(input('γq1= '))
+γg1 = float(input('γg1= '))
+γq1 = float(input('γq1= '))
 print('--------------------------------------------------------------------------------------------------')
 
 print('3. LOAD COMBINATION FOR ULS')
-W=print('Load combinations for ULS= ', float(float(γg1)*g1+float(γq1)*q1))
-W=float(float(γg1)*g1+float(γq1)*q1)
+W = γg1 * g1 + γq1 * q1  # Calculate Load Combination for ULS
+print(f'Load combinations for ULS= {W:.2f} kN/m')
 print('--------------------------------------------------------------------------------------------------')
 
 print('4. DESIGN BENDING MOMENT AND SHEAR FORCES')
-L=float(input('Span of beam= '))
+L = float(input('Span of beam= '))
 
 print('Maximum bending moment occurs at mid span, maximum shear force occurs at supports')
-#W=None
-#if W==None:
-     #W=65.25
-M=print('Design bending moment=(W*(L*L)/8)=  ', (W*(L*L)/8), 'kn-m')
-
-print('Maximum design shear force at supports,')
-Vs=print('Design shear force at supports=(W*L)/2)=  ', ((W*L)/2), 'kn')
-Vs=((W*L)/2)
+M = (W * L**2) / 8  # Design bending moment
+Vs = (W * L) / 2  # Design shear force
+print(f'Design bending moment = {M:.2f} kN-m')
+print(f'Design shear force at supports = {Vs:.2f} kN')
 print('--------------------------------------------------------------------------------------------------')
 
 print('5. CROSS SECTION PROPERTIES')
-beam_section=input('Beam section: ')
-h=input('Depth(mm)= ')
-b=input('Width(mm)= ')
-tw=input('Web thickness(mm)= ')
-tf=input('Flange thickness(mm)= ')
-r=input('Root radius(mm)= ')
-d=input('Depth between flange fillets(mm)= ')
-iy=input('Second moment of area, y-y axis(cm^4)= ')
-Wply=input('Plastic modulus, y-y axis(cm^3)= ')
-A=input('Area(cm^2)= ')
-E=input('Modulus of elasticity(n/mm^2)= ')
-fy=input('Yield strength(n/mm^2)= ')
-import math
-ε=math.sqrt(235/int(fy))
-print('ε= ', ε)
+beam_section = input('Beam section: ')
+h = float(input('Depth(mm)= '))
+b = float(input('Width(mm)= '))
+tw = float(input('Web thickness(mm)= '))
+tf = float(input('Flange thickness(mm)= '))
+r = float(input('Root radius(mm)= '))
+d = float(input('Depth between flange fillets(mm)= '))
+iy = float(input('Second moment of area, y-y axis(cm^4)= '))
+Wply = float(input('Plastic modulus, y-y axis(cm^3)= '))
+A = float(input('Area(cm^2)= '))
+E = float(input('Modulus of elasticity(n/mm^2)= '))
+fy = float(input('Yield strength(n/mm^2)= '))
+
+ε = math.sqrt(235 / fy)
+print(f'ε = {ε:.2f}')
 
 print('--------------------------------------------------------------------------------------------------')
 print('6. CROSS SECTIONAL RESISTANCE')
 print('6.1 SHEAR BUCKLING CHECK- VERIFIED ACCORDING TO SECTION 5 OF BSEN 1993-1-5')
 
-hw=(float(h))-((2*float(tf)))
-η=1.0
-
-if (float(hw)/float(tw))>(72*ε)/(η):
-     print('Shear buckling resistance for webs should be verified since (hw/tw)>(72*ε)/η')
+hw = h - (2 * tf)
+η = 1.0
+if hw / tw > (72 * ε) / η:
+    print('Shear buckling resistance for webs should be verified since (hw/tw) > (72*ε)/η')
 else:
-     print('Shear buckling resistance of the web does not need to be verified since (hw/tw)<(72*ε)/η')
-     
+    print('Shear buckling resistance of the web does not need to be verified since (hw/tw) < (72*ε)/η')
+
 print('.................................................')
 
+# Shear Resistance Check
 print('6.2 SHEAR RESISTANCE CHECK')
-print('Vr is the design plastic shear resistance')
-print('Vr=[Av(fy/√3)]/γM0')
-print('Av or Ax is shear area with the load applied parallel to the web')
+Av = (A - 2 * b * tf) + (tf * (tw + 2 * r))
+Ax = η * hw * tw
+Vr = min(Av, Ax) * (fy / math.sqrt(3))
+print(f'Vr = {Vr:.2f} kN')
 
-
-Av=(float(A)-(2*float(b))*float(tf))+(float(tf)*(float(tw)+(2*float(r))))
-Ax=(float(η)*float(hw)*float(tw))
-print('Av= ',Av)
-print('Ax= ',Ax)
-Vr=float(Av)*(float(fy)/math.sqrt(3))
-
-if Av>Ax:
-     Vr=float(Av)*(float(fy)/math.sqrt(3))
+if Vs / Vr < 1:
+    print('Shear resistance of the section is adequate since (Vs/Vr) < 1')
 else:
-     Vr=float(Ax)*(float(fy)/math.sqrt(3))
-     
-print('Vr=(Av)*(fy)/sqrt(3) ',Vr, 'kN')
-
-if ((Vs)/(Vr)) <float(1):
-     print('Shear resistance of the section is adequate since (Vs/Vr)<1')
-else:
-     print('Shear resistance of the section is inadequate since (Vs/Vr)>1')
-print(Vs/Vr)
+    print('Shear resistance of the section is inadequate since (Vs/Vr) > 1')
+print(Vs / Vr)
 
 print('.................................................')
 
+# Bending Resistance Check
 print('6.3 BENDING RESISTANCE CHECK')
-print('M_crd is the design resistance for bending for class 1& 2 sections')
-print('Bending resistance of the section is adequate if M/M_crd<1')
-print('At the point of maximum bending moment, at mid span, if (Vr/2)>Vs, bending resistance is not reduced by shear force')
-print('Vr/2=',float(Vr/float(2)))
-x=Vr/2
-if x>Vs:
-     print('Since (Vr/2)>Vs,bending resistance is not reduced by shear force')
-else:
-     print('Since (Vr/2)<Vs,bending resistance is reduced by shear force')
+M_crd = (Wply * fy) / 1e6  # Design bending resistance
+print(f'M_crd = {M_crd:.2f} kNm')
 
-print('M_crd = (Wply*fy)')
-M_crd=int(Wply)*int(fy)/(1e6)
-print('Design bending resistance, M_crd = (Wply*fy)/10^6=',int(Wply)*int(fy)/(1e6), 'kNm')
-M=(W*(L*L)/8)
-if float(M)>M_crd:
-     print('Since M>M_crd,bending moment resistance is inadequate')
+if M > M_crd:
+    print('Since M > M_crd, bending moment resistance is inadequate')
 else:
-     print('Since M<M_crd,bending moment resistance is adequate')
+    print('Since M < M_crd, bending moment resistance is adequate')
 
 print('--------------------------------------------------------------------------------------------------')
+
+# Vertical Deflection Check
 print('7. VERTICAL DEFLECTION CHECK AT SERVICEABILITY LIMIT STATE')
-print('For a conservative design, total load has been considered for deflection and vibration check')
-W_T=((print('W_L,Total Load=g1+q1=  ', (g1+q1), 'kn-m')))
-print('Vertical Deflection = δ')
-A=print(('(int(5)*str(W_T)*int(L**4))',(int(5)*(g1+q1))*int(L*L*L*L)))
-B=print('(int(384)*float(E)*float(iy))',(int(384)*float(E)*float(iy)))
-print('Vertical Deflection = δ',(A/B))
+W_T = g1 + q1  # Total load
+print(f'W_L, Total Load = g1 + q1 = {W_T:.2f} kN/m')
 
-
-
-
-
-
-
-
-
-
+deflection = (5 * W_T * L**4) / (384 * E * iy)
+print(f'Vertical Deflection = δ = {deflection:.2f} mm')
